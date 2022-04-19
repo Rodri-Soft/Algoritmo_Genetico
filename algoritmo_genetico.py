@@ -53,6 +53,7 @@ def fathers_selection(population_fitness):
     roulette_slices = []
     total_roulette_slices = 0
     for i in range(len(population_fitness)):
+        
         slice_value = reference_value - population_fitness[i]
         slice_value = round(slice_value)
         total_roulette_slices += slice_value
@@ -137,24 +138,32 @@ def fathers_mix(fathers, population):
 def mutate_child(child, mutation_probability):
     
     new_mutate_child = []
+
+    # Calculating the standard deviation
     standar_deviation = statistics.pstdev(child)
 
     for i in range(10):
 
+        # Calculating the probability of mutation of the gene
         gene_probability = random.randint(1, 10)    
         is_mutated = False
         if gene_probability <= mutation_probability:
             is_mutated = True
         
         if is_mutated:        
-                                    
+            
+            # Execute the process until a gene is found within the bounds
             correct_gene = False
             while correct_gene == False:
 
+                # Calculating Gaussian distribution with a mean of 0
                 gaussian_distribution = random.gauss(0, standar_deviation)
+
+                # Calculating the new gene with the Gaussian distribution
                 new_gene = child[i] + gaussian_distribution
                 new_gene = round(new_gene, 3)  
 
+                # Checking gene boundaries
                 if (new_gene >= -5.12) and (new_gene <= 5.12):            
                     new_mutate_child.append(new_gene)
                     correct_gene = True
@@ -162,9 +171,7 @@ def mutate_child(child, mutation_probability):
         else:
 
             new_mutate_child.append(child[i])
-
-    # print("\nHijo mutado")
-    # print(new_mutate_child)
+    
     return new_mutate_child
 
 
@@ -175,7 +182,8 @@ def run():
     mutation_probability = int(input('Probabilidad de mutación: ')) 
 
     evaluations_graph = []
-    best_individual_graph = []
+    best_individual_graph = []    
+    fitness_zero = False
 
     # Generate population
     population = []
@@ -192,7 +200,7 @@ def run():
         population_fitness = []
         for i in range(population_size):
             fitness = fitness_function(population[i])   
-            population_fitness.append(fitness)                 
+            population_fitness.append(fitness)                             
 
         # Generate decendents list minus one
         decendents_list = []
@@ -247,12 +255,24 @@ def run():
             population_fitness.append(fitness)     
 
         print("Mejor aptitud: "+ str(population_fitness[0]))  
-        best_individual_graph.append(population_fitness[0])       
+        worst_individual = max(population_fitness)        
+        print("Peor aptitud: "+str(worst_individual))        
+
+        best_individual_graph.append(population_fitness[0])    
+        
+        # Evaluate if the algorithm should stop
+        if population_fitness[0] < 1:
+            fitness_zero = True
+            break
+
 
     
     fig, ax = plt.subplots()
     ax.plot(evaluations_graph, best_individual_graph)
     plt.show()      
+
+    if fitness_zero:
+        print("Mejor aptitud menor a 1")
 
 
 if __name__ == '__main__':
